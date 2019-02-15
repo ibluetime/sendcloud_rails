@@ -51,6 +51,13 @@ module Sendcloud
         plain: extract_text(rails_message),
         fromName: rails_message['from-name']
       }
+      
+      attachment = rails_message.attachments&.first
+      if attachment
+        path = Rails.root.join('tmp', attachment.filename)
+        File.write(path, attachment.body.to_s)
+        sendcloud_message[:attachments] = File.new(path, 'r')
+      end
 
       [:cc, :bcc].each do |key|
         sendcloud_message[key] = rails_message[key].formatted if rails_message[key]
